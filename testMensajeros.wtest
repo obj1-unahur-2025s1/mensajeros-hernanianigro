@@ -1,0 +1,119 @@
+import mensajeria.*
+import mensajeros.*
+
+describe "Test de Mensajeros " {
+
+//PRIMERA PARTE
+test "Roberto (90kg) puede llevar un paquete que está pago en un camión que tiene un acoplado" {
+	camion.acoplados(1)
+	paquete.pagar()
+	assert.that(paquete.puedeSerEntregadoPor(roberto))
+}
+test "Neo con crédito no puede llevar un paquete que no está pago a la matrix" {
+	neo.recargar()
+	paquete.destino(matrix)
+	assert.notThat(paquete.puedeSerEntregadoPor(neo))
+}
+//SEGUNDA PARTE
+test "La mensajeria contrata a Neo" {
+	mensajeria.contratar(neo)
+	assert.that(mensajeria.mensajeros().contains(neo))
+}
+test "La mensajeria despide a Neo" {
+	mensajeria.contratar(neo)
+	mensajeria.despedir(neo)
+	assert.notThat(mensajeria.mensajeros().contains(neo))
+}
+test "La mensajeria despide a todos los mensajeros"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	mensajeria.despedirATodos()
+	assert.equals([],mensajeria.mensajeros())
+}
+test "La mensajeria es grande si tiene mas de dos mensajeros"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	assert.that(mensajeria.esGrande())
+}
+test "El paquete puede ser entregado por el primer empleado, si es Neo y va a Brooklyn"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(chuck)
+	paquete.destino(brooklyn)
+	paquete.pagar()
+	assert.that(mensajeria.elPrimeroPuedeEntregarlo())
+}
+test "El peso del ultimo mensajero es 95, si Roberto (con bicicleta) es el ultimo en contratarse"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	roberto.transporte(bicicleta)
+	assert.equals(95,mensajeria.pesoDelUltimoMensajero())	
+}
+//TERCERA PARTE
+test "Algun mensajero de los tres contratados puede enviar el paquete pagado"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	paquete.destino(brooklyn)
+	paquete.pagar()
+	assert.that(mensajeria.alguienPuedeEntregar(paquete))
+}
+test "Neo y Chuck pueden enviar el paquete, pero roberto no puede"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	paquete.destino(brooklyn)
+	paquete.pagar()
+	assert.equals([neo,chuck],mensajeria.quienesPuedenEntregar(paquete))
+}
+test "La mensajeria no tiene sobrepeso si contrata a todos (el promedio del peso de los mensajeros es superior a 500Kg)"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	assert.notThat(mensajeria.tieneSobrepeso())
+}
+test "La mensajeria envia un paquete"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	paquete.destino(brooklyn)
+	paquete.pagar()
+	mensajeria.enviar(paquete)
+	assert.that(mensajeria.enviados().contains(paquete))
+	assert.notThat(mensajeria.pendientes().contains(paquete))
+}
+test "Conocer la facturacion por haber enviado un paquete y un paquetito"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	paquete.destino(brooklyn)
+	paquete.pagar()
+	mensajeria.enviar(paquete)
+	mensajeria.enviar(paquetito)
+	assert.equals(paquete.precio() + paquetito.precio(), mensajeria.facturacion())
+}
+test "Dado un conjunto de paquetes, enviarlos a todos"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	paquete.pagar()
+	paquetonViajero.pagar(2000)
+	mensajeria.enviarVarios([paquete,paquetito,paquetonViajero])
+	assert.notThat(mensajeria.pendientes().contains(paquete))
+	assert.notThat(mensajeria.pendientes().contains(paquetito))
+	assert.notThat(mensajeria.pendientes().contains(paquetonViajero))
+}
+test "El paqueton (el paquete mas caro) sigue pendiente a pesar de intentar enviarlo"{
+	mensajeria.contratar(neo)
+	mensajeria.contratar(roberto)
+	mensajeria.contratar(chuck)
+	mensajeria.enviarVarios([paquete,paquetito,paquetonViajero])
+	mensajeria.enviarPendienteMasCaro()
+	assert.that(mensajeria.pendientes().contains(paquetonViajero))
+}
+test "El nuevo mensajero solo puede pasar por brooklyn"{
+	assert.that(brooklyn.dejarPasar(mensajeroNuevo))
+	assert.notThat(matrix.dejarPasar(mensajeroNuevo))
+}			
+}
